@@ -22,11 +22,6 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'rclpy',
-        'sensor-msgs',
-        'cv-bridge',
-        'opencv-python',
-        'numpy',
     ],
     zip_safe=True,
     maintainer='ROS 2 机器人软件工程师',
