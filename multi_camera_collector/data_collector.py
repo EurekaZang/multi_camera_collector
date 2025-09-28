@@ -13,6 +13,7 @@ import os
 import cv2
 import numpy as np
 import json
+import time
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
@@ -30,12 +31,20 @@ class DataCollectorNode(Node):
         
         # 声明参数
         self.declare_parameter('output_dir', './dataset')
+        self.declare_parameter('max_fps', 5.0)  # 默认最大5FPS，避免产生过多图片
         
         # 初始化变量
         self.bridge = CvBridge()
         self.camera_count = 0  # 标准相机保存的图像对数量
         self.femto_count = 0   # Femto相机保存的图像对数量
         self.count_lock = Lock()  # 线程安全的计数器
+        
+        # FPS控制相关变量
+        self.max_fps = self.get_parameter('max_fps').get_parameter_value().double_value
+        self.min_interval = 1.0 / self.max_fps if self.max_fps > 0 else 0.0  # 最小时间间隔
+        self.last_save_time_camera = 0.0    # 标准相机上次保存时间
+        self.last_save_time_femto = 0.0     # Femto相机上次保存时间
+        self.fps_lock = Lock()  # FPS控制锁
         
         # 获取输出目录参数
         self.output_dir = self.get_parameter('output_dir').get_parameter_value().string_value
@@ -47,6 +56,9 @@ class DataCollectorNode(Node):
         self._setup_subscribers()
         
         self.get_logger().info(f'多相机数据采集节点已启动，数据将保存到: {self.output_dir}')
+        self.get_logger().info(f'最大采集帧率: {self.max_fps} FPS (最小间隔: {self.min_interval:.3f}s)')
+        if self.max_fps <= 0:
+            self.get_logger().warn('FPS限制已禁用 (max_fps <= 0)，将采集所有接收到的数据')
         self.get_logger().info('按 Ctrl+C 优雅关闭节点')
     
     def _create_directories(self):
@@ -118,6 +130,39 @@ class DataCollectorNode(Node):
         
         self.get_logger().info('订阅器和时间同步器已设置完成')
     
+    def _should_save_data(self, camera_type):
+        """
+        检查是否应该根据FPS限制保存数据
+        
+        Args:
+            camera_type (str): 'camera' 或 'femto'
+            
+        Returns:
+            bool: True表示应该保存，False表示跳过
+        """
+        if self.max_fps <= 0:
+            # FPS限制禁用，保存所有数据
+            return True
+            
+        current_time = time.time()
+        
+        with self.fps_lock:
+            if camera_type == 'camera':
+                time_since_last = current_time - self.last_save_time_camera
+                if time_since_last >= self.min_interval:
+                    self.last_save_time_camera = current_time
+                    return True
+                else:
+                    return False
+            elif camera_type == 'femto':
+                time_since_last = current_time - self.last_save_time_femto
+                if time_since_last >= self.min_interval:
+                    self.last_save_time_femto = current_time
+                    return True
+                else:
+                    return False
+        return False
+    
     def _save_camera_info(self, camera_info_msg, file_path):
         """保存camera_info消息为JSON文件"""
         try:
@@ -158,6 +203,11 @@ class DataCollectorNode(Node):
     def _camera_callback(self, rgb_msg, depth_msg, rgb_info_msg, depth_info_msg):
         """标准相机的同步回调函数"""
         try:
+            # 检查是否应该根据FPS限制保存数据
+            if not self._should_save_data('camera'):
+                self.get_logger().debug('标准相机数据被FPS限制跳过')
+                return
+                
             # 使用RGB消息的时间戳作为文件名（纳秒级精度）
             timestamp = rgb_msg.header.stamp.sec * 1000000000 + rgb_msg.header.stamp.nanosec
             
@@ -195,6 +245,11 @@ class DataCollectorNode(Node):
     def _femto_callback(self, rgb_msg, depth_msg, rgb_info_msg, depth_info_msg):
         """Femto相机的同步回调函数"""
         try:
+            # 检查是否应该根据FPS限制保存数据
+            if not self._should_save_data('femto'):
+                self.get_logger().debug('Femto相机数据被FPS限制跳过')
+                return
+                
             # 使用RGB消息的时间戳作为文件名（纳秒级精度）
             timestamp = rgb_msg.header.stamp.sec * 1000000000 + rgb_msg.header.stamp.nanosec
             
@@ -257,6 +312,7 @@ def main(args=None):
         # 打印总结信息
         collector_node.get_logger().info('=' * 60)
         collector_node.get_logger().info('数据采集完成总结:')
+        collector_node.get_logger().info(f'FPS设置: {collector_node.max_fps} FPS {"(无限制)" if collector_node.max_fps <= 0 else ""}')
         collector_node.get_logger().info(f'标准相机 (camera): 已保存 {camera_count} 组RGB-D图像对')
         collector_node.get_logger().info(f'Femto相机 (camera_femto): 已保存 {femto_count} 组RGB-D图像对')
         collector_node.get_logger().info(f'总计: {camera_count + femto_count} 组图像对')

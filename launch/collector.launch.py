@@ -28,6 +28,13 @@ def generate_launch_description():
         description='数据保存的根目录路径。例如: /home/user/my_dataset'
     )
     
+    # 声明FPS参数
+    max_fps_arg = DeclareLaunchArgument(
+        'max_fps',
+        default_value='5.0',
+        description='最大采集帧率(FPS)。设置为0或负数将禁用FPS限制。默认5.0FPS避免产生过多图片'
+    )
+    
     # 声明日志级别参数
     log_level_arg = DeclareLaunchArgument(
         'log_level',
@@ -43,6 +50,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'output_dir': LaunchConfiguration('output_dir'),
+            'max_fps': LaunchConfiguration('max_fps'),
         }],
         arguments=['--ros-args', '--log-level', LaunchConfiguration('log_level')],
         # 在节点终止时重新映射
@@ -55,6 +63,7 @@ def generate_launch_description():
     return LaunchDescription([
         # 添加所有launch参数
         output_dir_arg,
+        max_fps_arg,
         log_level_arg,
         
         # 添加节点

@@ -7,11 +7,12 @@
 - ✅ **双相机支持**: 同时采集标准相机和Femto相机数据
 - ✅ **完整数据采集**: 同时保存RGB图像、深度图像和相机标定信息(camera_info)
 - ✅ **精确时间同步**: 使用`message_filters.ApproximateTimeSynchronizer`确保所有数据时间同步
+- ✅ **智能FPS控制**: 可配置最大采集帧率，避免产生过多图片，默认5FPS
 - ✅ **高精度保存**: 深度图像保持16位精度，RGB图像保存为标准格式
 - ✅ **纳秒级时间戳**: 文件名使用纳秒级时间戳确保唯一性和关联性
 - ✅ **标定信息保存**: camera_info保存为JSON格式，便于后续处理
 - ✅ **优雅关闭**: 支持Ctrl+C优雅关闭并显示采集统计
-- ✅ **参数化配置**: 使用ROS 2参数系统配置输出目录
+- ✅ **参数化配置**: 使用ROS 2参数系统配置输出目录和采集帧率
 - ✅ **生产就绪**: 包含错误处理、日志记录和线程安全
 
 ## 系统要求
@@ -66,7 +67,7 @@ source ~/ros2_ws/install/setup.bash
 
 ### 基本启动
 
-使用默认设置启动数据采集：
+使用默认设置启动数据采集（5FPS限制）：
 
 ```bash
 ros2 launch multi_camera_collector collector.launch.py
@@ -78,6 +79,32 @@ ros2 launch multi_camera_collector collector.launch.py
 
 ```bash
 ros2 launch multi_camera_collector collector.launch.py output_dir:=/home/user/my_dataset
+```
+
+### 自定义FPS设置
+
+控制采集帧率以避免产生过多图片：
+
+```bash
+# 设置最大1FPS（适合长时间采集）
+ros2 launch multi_camera_collector collector.launch.py max_fps:=1.0
+
+# 设置最大10FPS（适合快速场景变化）
+ros2 launch multi_camera_collector collector.launch.py max_fps:=10.0
+
+# 禁用FPS限制（采集所有数据，谨慎使用！）
+ros2 launch multi_camera_collector collector.launch.py max_fps:=0
+```
+
+### 组合参数
+
+同时设置多个参数：
+
+```bash
+ros2 launch multi_camera_collector collector.launch.py \
+  output_dir:=/home/user/dataset \
+  max_fps:=2.0 \
+  log_level:=info
 ```
 
 ### 调试模式

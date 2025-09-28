@@ -22,7 +22,7 @@ echo ""
 echo "📋 可用的启动选项："
 echo ""
 
-echo "1️⃣  基本启动 (使用默认设置):"
+echo "1️⃣  基本启动 (默认5FPS限制):"
 echo "   ros2 launch multi_camera_collector collector.launch.py"
 echo ""
 
@@ -30,13 +30,20 @@ echo "2️⃣  自定义输出目录:"
 echo "   ros2 launch multi_camera_collector collector.launch.py output_dir:=/home/user/my_dataset"
 echo ""
 
-echo "3️⃣  调试模式 (详细日志):"
+echo "3️⃣  自定义FPS限制:"
+echo "   ros2 launch multi_camera_collector collector.launch.py max_fps:=1.0  # 1FPS，适合长时间采集"
+echo "   ros2 launch multi_camera_collector collector.launch.py max_fps:=10.0 # 10FPS，适合动态场景"
+echo "   ros2 launch multi_camera_collector collector.launch.py max_fps:=0    # 无限制，谨慎使用！"
+echo ""
+
+echo "4️⃣  调试模式 (详细日志):"
 echo "   ros2 launch multi_camera_collector collector.launch.py log_level:=debug"
 echo ""
 
-echo "4️⃣  组合参数:"
+echo "5️⃣  组合参数:"
 echo "   ros2 launch multi_camera_collector collector.launch.py \\"
 echo "     output_dir:=/home/user/dataset \\"
+echo "     max_fps:=2.0 \\"
 echo "     log_level:=info"
 echo ""
 
