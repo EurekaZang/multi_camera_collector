@@ -1,6 +1,6 @@
 # Multi-Camera Data Collector
 
-一个生产级的 ROS 2 Foxy 多相机RGB-D数据采集包，专为同步采集和保存来自标准相机和Orbbec Femto相机的图像数据和相机标定参数而设计。
+一个生产级的 ROS 2 Foxy 多相机RGB-D数据采集包，专为同步采集和保存来自Intel Realsense相机和Orbbec Femto相机的图像数据和相机标定参数而设计。
 
 ## 功能特性
 
@@ -234,7 +234,7 @@ Apache-2.0
 
 ## 作者
 
-ROS 2 机器人软件工程师
+Eureka Zang
 
 ---
 
