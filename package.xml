@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>multi_camera_collector</name>
+  <version>1.0.0</version>
+  <description>
+    ROS 2 Foxy 多相机RGB-D数据采集包，支持时间同步的图像保存功能。
+    专为标准相机和Orbbec Femto相机设计，提供生产级的数据采集解决方案。
+  </description>
+  
+  <maintainer email="developer@example.com">ROS 2 机器人软件工程师</maintainer>
+  <license>Apache-2.0</license>
+  
+  <url type="website">https://github.com/your-username/multi_camera_collector</url>
+  <url type="bugtracker">https://github.com/your-username/multi_camera_collector/issues</url>
+  <url type="repository">https://github.com/your-username/multi_camera_collector</url>
+  
+  <!-- 构建工具依赖 -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  
+  <!-- 核心ROS 2依赖 -->
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  
+  <!-- 图像处理依赖 -->
+  <depend>cv_bridge</depend>
+  
+  <!-- Python依赖 -->
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  
+  <!-- 测试依赖 -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  
+  <!-- 导出信息 -->
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

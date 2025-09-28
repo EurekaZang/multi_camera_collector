@@ -1,0 +1,140 @@
+# 更新日志 - Camera Info 支持
+
+## 版本: v1.1.0
+**发布日期**: 2025年9月29日  
+**更新类型**: 功能增强
+
+## 🚀 新增功能
+
+### Camera Info 数据采集
+- **完整标定信息采集**: 现在同时采集和保存相机的标定信息(camera_info)
+- **时间同步升级**: 同步器现在处理4个数据流（RGB图像 + RGB相机信息 + 深度图像 + 深度相机信息）
+- **JSON格式保存**: Camera info以结构化JSON格式保存，便于后续处理
+
+### 新增话题订阅
+添加了以下4个camera_info话题的订阅：
+- `/camera/color/camera_info` (标准相机RGB)
+- `/camera/depth/camera_info` (标准相机深度)
+- `/camera/color/camera_info_femto` (Femto相机RGB)
+- `/camera/depth/camera_info_femto` (Femto相机深度)
+
+### 目录结构更新
+每个相机现在都有独立的camera_info目录：
+```
+dataset/
+├── camera/
+│   ├── rgb/
+│   ├── depth/
+│   └── camera_info/          # 新增
+└── camera_femto/
+    ├── rgb/
+    ├── depth/
+    └── camera_info/          # 新增
+```
+
+## 📝 文件变更
+
+### 核心代码更新
+- **data_collector.py**:
+  - 添加`sensor_msgs.CameraInfo`和`json`导入
+  - 新增`_save_camera_info()`方法
+  - 更新时间同步器以处理4个数据流
+  - 修改回调函数签名和逻辑
+
+### 配置文件更新
+- **package.xml**: 无需更改（已包含sensor_msgs依赖）
+- **setup.py**: 添加了json依赖（Python标准库）
+
+### 文档更新
+- **README.md**: 
+  - 更新功能特性描述
+  - 添加camera_info话题列表
+  - 更新目录结构说明
+  - 新增文件命名规则
+- **CAMERA_INFO_FORMAT.md**: 新增详细的JSON格式说明文档
+- **quick_start.sh**: 更新话题检查列表
+
+## 🔧 技术细节
+
+### 数据同步
+- **同步对象数量**: 从2个增加到4个
+- **同步方式**: `message_filters.ApproximateTimeSynchronizer`
+- **容忍度**: 保持0.1秒不变
+- **队列大小**: 保持10不变
+
+### 文件格式
+- **图像文件**: 保持PNG格式不变
+- **Camera Info**: 新增JSON格式
+- **命名规范**:
+  - RGB相机信息: `{timestamp}_rgb_camera_info.json`
+  - 深度相机信息: `{timestamp}_depth_camera_info.json`
+
+### JSON数据结构
+Camera info JSON包含完整的标定信息：
+- Header信息（时间戳、坐标系）
+- 图像尺寸（宽度、高度）
+- 内参矩阵（K）
+- 畸变参数（D）
+- 校正矩阵（R）
+- 投影矩阵（P）
+- 像素合并信息
+- ROI信息
+
+## 🧪 测试验证
+
+### 构建测试
+- ✅ `colcon build` 成功
+- ✅ 所有依赖正确解析
+- ✅ 入口点正常工作
+
+### 功能测试
+- ✅ 安装测试脚本通过
+- ✅ Launch文件参数正确显示
+- ✅ 快速启动脚本更新话题检查
+
+## 📦 兼容性
+
+### 向前兼容
+- ✅ 现有的图像采集功能完全保持
+- ✅ 原有的文件命名方式不变
+- ✅ 启动方式和参数保持一致
+
+### ROS 2 兼容性
+- ✅ Foxy Fitzroy 完全支持
+- ✅ sensor_msgs/CameraInfo 标准消息类型
+- ✅ 标准JSON库使用
+
+## 🎯 使用影响
+
+### 对用户的影响
+- **正面影响**: 获得完整的相机标定信息，支持更精确的3D重建和SLAM应用
+- **文件数量变化**: 每个时间戳现在生成6个文件（原来2个图像 + 新增4个JSON）
+- **存储需求**: 轻微增加（JSON文件很小，通常<2KB每个）
+
+### 迁移指南
+- **现有用户**: 无需任何更改，直接使用即可获得新功能
+- **脚本更新**: 如果有自动化脚本，需要考虑新的camera_info文件
+
+## 🔮 未来计划
+
+### 短期改进
+- [ ] 添加camera_info验证功能
+- [ ] 提供数据质量检查工具
+- [ ] 添加可视化脚本示例
+
+### 长期规划
+- [ ] 支持更多相机类型
+- [ ] 添加实时预览功能
+- [ ] 集成标定验证工具
+
+## 📞 获取支持
+
+如果在使用新功能时遇到问题：
+1. 查看 `CAMERA_INFO_FORMAT.md` 了解JSON格式详情
+2. 查看 `CONFIG_FAQ.md` 获取常见问题解答
+3. 运行测试脚本验证安装
+4. 使用调试模式获取详细日志
+
+---
+
+**总结**: 此次更新显著增强了数据采集的完整性，为高精度机器人感知应用提供了完整的相机标定数据支持，同时保持了完全的向后兼容性。
