@@ -22,6 +22,8 @@ setup(
     ],
     install_requires=[
         'setuptools',
+        'pandas',  # 用于CSV文件处理
+        'numpy',   # 数据处理依赖
     ],
     zip_safe=True,
     maintainer='ROS 2 机器人软件工程师',
@@ -33,6 +35,9 @@ setup(
         'console_scripts': [
             # 定义可执行节点的入口点
             'multi_camera_collector = multi_camera_collector.data_collector:main',
+            # 数据集制作工具的入口点
+            'make_dataset = multi_camera_collector.make_dataset:main',
+            'dataset_generator = multi_camera_collector.dataset_generator:main',
         ],
     },
 )

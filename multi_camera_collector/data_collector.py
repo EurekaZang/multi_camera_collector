@@ -4,9 +4,6 @@ ROS 2 Multi-Camera Data Collector Node
 
 这个节点订阅两个相机（标准相机和Femto相机）的RGB和深度图像，
 通过精确的时间同步将匹配的图像对保存为PNG文件。
-
-作者: ROS 2 机器人软件工程师
-版本: ROS 2 Foxy Fitzroy
 """
 
 import os

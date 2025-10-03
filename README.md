@@ -14,6 +14,10 @@
 - ✅ **优雅关闭**: 支持Ctrl+C优雅关闭并显示采集统计
 - ✅ **参数化配置**: 使用ROS 2参数系统配置输出目录和采集帧率
 - ✅ **生产就绪**: 包含错误处理、日志记录和线程安全
+- 🆕 **一键数据集制作**: 自动生成深度学习友好的CSV索引文件
+- 🆕 **多种输出格式**: 支持组合式和分离式数据集文件
+- 🆕 **数据集验证**: 智能验证数据完整性和结构正确性
+- 🆕 **统计分析**: 自动生成数据集统计报告
 
 ## 系统要求
 
@@ -32,6 +36,7 @@
 ### Python 依赖
 - `opencv-python`
 - `numpy`
+- `pandas` (用于数据集制作功能)
 
 ## 安装与构建
 
@@ -214,6 +219,96 @@ Femto相机 (camera_femto): 已保存 147 组RGB-D图像对
 数据保存位置: /home/user/dataset
 ============================================================
 ```
+
+## 🆕 数据集制作功能
+
+采集完数据后，您可以使用内置的数据集制作工具生成便于深度学习使用的CSV索引文件。
+
+### 快速开始
+
+```bash
+# 一键生成数据集CSV文件（推荐）
+./make_dataset.sh /path/to/your/dataset
+
+# 使用ROS2命令
+ros2 run multi_camera_collector make_dataset /path/to/your/dataset
+
+# 直接运行Python脚本
+python3 multi_camera_collector/make_dataset.py /path/to/your/dataset
+```
+
+### 输出格式选项
+
+```bash
+# 生成组合CSV文件（默认，推荐用于深度学习）
+./make_dataset.sh /path/to/dataset --format combined
+
+# 为每个相机生成单独的CSV文件
+./make_dataset.sh /path/to/dataset --format separate
+
+# 同时生成组合和单独的CSV文件
+./make_dataset.sh /path/to/dataset --format both
+```
+
+### 生成的文件
+
+数据集制作工具会在数据集根目录生成以下文件：
+
+- `dataset.csv` - 主数据索引文件（包含所有相机数据，推荐用于深度学习）
+- `camera_dataset.csv` - 标准相机数据索引（仅在separate/both模式下生成）
+- `camera_femto_dataset.csv` - Femto相机数据索引（仅在separate/both模式下生成）
+- `dataset_statistics.json` - 数据集统计信息
+
+### CSV文件格式
+
+生成的CSV文件包含以下列，便于深度学习框架使用：
+
+| 列名 | 说明 |
+|-----|------|
+| `camera_type` | 相机类型 (camera/camera_femto) |
+| `timestamp` | 纳秒级时间戳 |
+| `rgb_path` | RGB图像相对路径 |
+| `depth_path` | 深度图像相对路径 |
+| `rgb_camera_info_path` | RGB相机信息文件相对路径 |
+| `depth_camera_info_path` | 深度相机信息文件相对路径 |
+| `rgb_absolute_path` | RGB图像绝对路径 |
+| `depth_absolute_path` | 深度图像绝对路径 |
+| `rgb_width` | RGB图像宽度 |
+| `rgb_height` | RGB图像高度 |
+| `depth_width` | 深度图像宽度 |
+| `depth_height` | 深度图像高度 |
+
+### 深度学习集成示例
+
+```python
+import pandas as pd
+import cv2
+from torch.utils.data import Dataset
+
+class MultiCameraDataset(Dataset):
+    def __init__(self, csv_file, dataset_root):
+        self.data_frame = pd.read_csv(csv_file)
+        self.dataset_root = Path(dataset_root)
+    
+    def __getitem__(self, idx):
+        row = self.data_frame.iloc[idx]
+        
+        # 加载RGB和深度图像
+        rgb_path = self.dataset_root / row['rgb_path']
+        depth_path = self.dataset_root / row['depth_path']
+        
+        rgb_image = cv2.imread(str(rgb_path))
+        depth_image = cv2.imread(str(depth_path), cv2.IMREAD_UNCHANGED)
+        
+        return {
+            'rgb': rgb_image,
+            'depth': depth_image,
+            'camera_type': row['camera_type'],
+            'timestamp': row['timestamp']
+        }
+```
+
+详细的数据集制作功能使用指南请参考 [DATASET_GUIDE.md](DATASET_GUIDE.md)。
 
 ## 故障排除
 
