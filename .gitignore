@@ -1,0 +1,4 @@
+/.venv
+/.vscode
+/log/
+/multi_camera_collector/__pycache__/
