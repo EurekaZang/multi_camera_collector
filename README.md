@@ -344,6 +344,33 @@ ros2 node info /multi_camera_collector
 ros2 param list /multi_camera_collector
 ```
 
+## 数据集合并
+
+### 合并多个数据集
+
+如果您有多个独立采集的数据集，可以使用 `merge_datasets` 工具将它们合并为一个统一的数据集：
+
+```bash
+# 基本用法：合并两个或多个数据集
+merge_datasets --output merged_dataset dataset1/ dataset2/ dataset3/
+
+# 为每个相机生成单独的CSV文件
+merge_datasets --output merged_dataset --format separate dataset1/ dataset2/
+
+# 使用不同的冲突解决策略
+merge_datasets --output merged_dataset --conflicts overwrite dataset1/ dataset2/
+```
+
+**功能特性:**
+- ✅ 合并多个数据集到单个目录
+- ✅ 自动处理时间戳冲突
+- ✅ 生成统一的CSV索引文件（格式与make_dataset相同）
+- ✅ 保留所有camera_info元数据
+- ✅ 支持多种冲突解决策略（offset/skip/overwrite）
+- ✅ 生成详细的合并统计信息
+
+**详细文档**: 查看 [MERGE_GUIDE.md](MERGE_GUIDE.md) 了解更多信息
+
 ## 性能优化
 
 - 根据需要调整队列大小和同步参数

@@ -11,17 +11,23 @@ import sys
 import argparse
 from pathlib import Path
 
-# 添加包路径以便导入
-current_dir = Path(__file__).parent
-if str(current_dir) not in sys.path:
-    sys.path.insert(0, str(current_dir))
-
+# 尝试多种导入方式以支持不同的执行环境
 try:
-    from dataset_generator import DatasetGenerator
+    # 方式1: 作为ROS2包导入（推荐）
+    from multi_camera_collector.dataset_generator import DatasetGenerator
 except ImportError:
-    print("❌ 错误: 无法导入dataset_generator模块")
-    print("请确保此脚本与dataset_generator.py在同一目录中")
-    sys.exit(1)
+    try:
+        # 方式2: 从当前目录导入（开发环境）
+        current_dir = Path(__file__).parent
+        if str(current_dir) not in sys.path:
+            sys.path.insert(0, str(current_dir))
+        from dataset_generator import DatasetGenerator
+    except ImportError:
+        print("❌ 错误: 无法导入dataset_generator模块")
+        print("请确保：")
+        print("  1. ROS2包已正确安装 (colcon build)")
+        print("  2. 或者此脚本与dataset_generator.py在同一目录中")
+        sys.exit(1)
 
 
 def main():

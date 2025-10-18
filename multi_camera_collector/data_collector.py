@@ -79,30 +79,30 @@ class DataCollectorNode(Node):
         
         # 标准相机的订阅器
         self.camera_rgb_sub = message_filters.Subscriber(
-            self, Image, '/camera/color/image_raw'
+            self, Image, '/camera/camera/color/image_raw'
         )
         self.camera_depth_sub = message_filters.Subscriber(
-            self, Image, '/camera/depth/image_rect_raw'
+            self, Image, '/camera/camera/depth/image_rect_raw'
         )
         self.camera_rgb_info_sub = message_filters.Subscriber(
-            self, CameraInfo, '/camera/color/camera_info'
+            self, CameraInfo, '/camera/camera/color/camera_info'
         )
         self.camera_depth_info_sub = message_filters.Subscriber(
-            self, CameraInfo, '/camera/depth/camera_info'
+            self, CameraInfo, '/camera/camera/depth/camera_info'
         )
         
         # Femto相机的订阅器
         self.femto_rgb_sub = message_filters.Subscriber(
-            self, Image, '/camera/color/image_raw_femto'
+            self, Image, '/camera/color/image_raw'
         )
         self.femto_depth_sub = message_filters.Subscriber(
-            self, Image, '/camera/depth/image_raw_femto'
+            self, Image, '/camera/depth/image_raw'
         )
         self.femto_rgb_info_sub = message_filters.Subscriber(
-            self, CameraInfo, '/camera/color/camera_info_femto'
+            self, CameraInfo, '/camera/color/camera_info'
         )
         self.femto_depth_info_sub = message_filters.Subscriber(
-            self, CameraInfo, '/camera/depth/camera_info_femto'
+            self, CameraInfo, '/camera/depth/camera_info'
         )
         
         # 标准相机的时间同步器
